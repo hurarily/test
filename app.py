@@ -8,18 +8,24 @@ app.secret_key = 'your_secret_key'  # Set a secret key for session management
 # 实例化 OpenAI 客户端
 client = OpenAI(api_key='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')
 
+# conn = mysql.connector.connect(
+#     host="localhost",
+#     user="root",
+#     password="root")
+# cursor = conn.cursor()
+# cursor.execute("DROP DATABASE db1")
+# cursor.execute("CREATE DATABASE IF NOT EXISTS db1")
+# conn = mysql.connector.connect(
+#     host="localhost",
+#     user="root",
+#     password="root",
+#     database="db1")
+# cursor = conn.cursor()
 conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root")
-cursor = conn.cursor()
-cursor.execute("DROP DATABASE db1")
-cursor.execute("CREATE DATABASE IF NOT EXISTS db1")
-conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",
-    database="db1")
+    host="dpg-cneu69uv3ddc73addcr0-a",
+    user="database_4mya_user",
+    password="zRZq7ozujDakxIlhNSlweDkA8v8xTzLn",
+    db="database_4mya")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS `users` (`UID` int(40) AUTO_INCREMENT, `account` VARCHAR(255), `password` VARCHAR(255), PRIMARY KEY (`UID`))")
 cursor.execute("CREATE TABLE IF NOT EXISTS `data` (`UID` int(40), `case` VARCHAR(255), `annotation` LONGTEXT, `proposal` LONGTEXT, `imageurl` LONGTEXT)")
