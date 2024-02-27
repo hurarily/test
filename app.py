@@ -194,3 +194,7 @@ def generate_design_proposal(design_topic, annotations):
         temperature=0.7
     )
     return response.choices[0].text.strip()
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
