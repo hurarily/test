@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Design Proposal Generator</title>
+</head>
+
+<body>
+    <h1>Design Proposal Generator</h1>
+    <!-- 添加一个刷新链接 -->
+    <p><a href="{{ url_for('listhistory') }}">History</a></p>
+    <p><a href="{{ url_for('refresh') }}">Refresh</a></p>
+    <p><a class="nav-link" href="/logout">Logout</a></p>
+
+    <!-- 第一部分：輸入設計案例描述 -->
+    {% if not session.get('annotations') %}
+    <form method="post">
+        <label for="design_case">Design Case Description:</label><br>
+        <textarea id="design_case" name="design_case" rows="4" cols="50"
+            placeholder="Enter the description..."></textarea><br><br>
+        <input type="submit" value="Generate Annotations">
+    </form>
+    {% endif %}
+
+    {% if session.get('annotations') %}
+    <!-- 顯示生成的設計注解 -->
+    <h2>Generated Annotations:</h2>
+    <p>{{ session['annotations'] }}</p>
+
+    <!-- 第二部分：輸入設計題目 -->
+    <form method="post">
+        <label for="design_topic">Design Topic:</label><br>
+        <input type="text" id="design_topic" name="design_topic" placeholder="Enter the design topic..."><br><br>
+        <input type="submit" value="Generate a Design Proposal">
+    </form>
+    {% endif %}
+
+    {% if session.get('new_design_proposal') %}
+    <!-- 顯示新的設計提案 -->
+    <h2>New Design Proposal:</h2>
+    <p>{{ session['new_design_proposal'] }}</p>
+
+    <!-- 添加生成图像的按钮 -->
+    <form action="{{ url_for('generate_image') }}" method="post">
+        <input type="submit" value="Generate an Image">
+    </form>
+    {% endif %}
+</body>
+
+</html>

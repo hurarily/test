@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Register</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+    function register() {
+      axios.post("{{ url_for('adduser') }}", {
+        'account': document.getElementById('account').value,
+        'password': document.getElementById('password').value,
+        'password2': document.getElementById('password2').value,
+      })
+        .then(function (res) {
+          msg = res.data.text
+          if (msg == 'success') {
+            alert('Register successfully!')
+            window.location.href = "{{ url_for('login') }}"
+          }
+          else {
+            document.getElementById('msgacc').textContent = res.data.msgacc
+            document.getElementById('msgpwd').textContent = res.data.msgpwd
+            document.getElementById('msgpwd2').textContent = res.data.msgpwd2
+          }
+        })
+    }
+  </script>
+
+  <style>
+    .errmsg {
+      color: red;
+      padding-left: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Register</a>
+        </li>
+    </div>
+  </nav>
+  <div class="card">
+    <div class="card-body">
+      <div>
+        Account <input type="text" id="account"><span class="errmsg" id="msgacc"></span>
+      </div>
+      <div>
+        Password <input type="text" id="password"><span class="errmsg" id="msgpwd"></span>
+      </div>
+      <div>
+        Confirmed Password <input type="text" id="password2"><span class="errmsg" id="msgpwd2"></span>
+      </div>
+      <input type="submit" value="Register" onclick="register()">
+    </div>
+  </div>
+</body>
+
+</html>
