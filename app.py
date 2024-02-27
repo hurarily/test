@@ -30,7 +30,7 @@ conn = psycopg2.connect(
     database="database_4mya")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account VARCHAR(255), password VARCHAR(255))")
-cursor.execute("CREATE TABLE IF NOT EXISTS data (UID integer(40), case VARCHAR(255), annotation LONGTEXT, proposal LONGTEXT, imageurl LONGTEXT)")
+cursor.execute("CREATE TABLE IF NOT EXISTS data (UID integer, case VARCHAR(255), annotation LONGTEXT, proposal LONGTEXT, imageurl LONGTEXT)")
 
 @app.route('/')
 def login():
