@@ -29,8 +29,8 @@ conn = psycopg2.connect(
     password="zRZq7ozujDakxIlhNSlweDkA8v8xTzLn",
     database="database_4mya")
 cursor = conn.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS `users` (`UID` int(40) AUTO_INCREMENT, `account` VARCHAR(255), `password` VARCHAR(255), PRIMARY KEY (`UID`))")
-cursor.execute("CREATE TABLE IF NOT EXISTS `data` (`UID` int(40), `case` VARCHAR(255), `annotation` LONGTEXT, `proposal` LONGTEXT, `imageurl` LONGTEXT)")
+cursor.execute("CREATE TABLE IF NOT EXISTS users (UID int(40) AUTO_INCREMENT, account VARCHAR(255), password VARCHAR(255), PRIMARY KEY (UID))")
+cursor.execute("CREATE TABLE IF NOT EXISTS data (UID int(40), case VARCHAR(255), annotation LONGTEXT, proposal LONGTEXT, imageurl LONGTEXT)")
 
 @app.route('/')
 def login():
@@ -72,7 +72,7 @@ def generate_image():
         design_proposal = session['new_design_proposal']
         image_url = generate_image_from_text(design_proposal)
         cursor.execute(
-            'INSERT INTO `data` (`UID`, `case`, `annotation`, `proposal`, `imageurl`) VALUES (%s, %s, %s, %s, %s)', \
+            'INSERT INTO data (UID, case, annotation, proposal, imageurl) VALUES (%s, %s, %s, %s, %s)', \
             (session['user']['id'], session['case'], session['annotations'], design_proposal, image_url))
         return render_template('image.html', image_url=image_url, session=session)
     return redirect(url_for('index'))
