@@ -23,6 +23,7 @@ client = OpenAI(api_key='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')
 # cursor = conn.cursor()
 conn = mysql.connector.connect(
     host="dpg-cneu69uv3ddc73addcr0-a",
+    port="5432",
     user="database_4mya_user",
     password="zRZq7ozujDakxIlhNSlweDkA8v8xTzLn",
     db="database_4mya")
