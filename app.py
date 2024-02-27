@@ -47,8 +47,8 @@ def index():
             if 'design_case' in request.form:
                 design_case = (request.form.get("design_case"))
                 session['case'] = str(design_case)
-                session['annotations'] = generate_annotations(design_case)
-                print(session['annotations'])
+                # session['annotations'] = generate_annotations(design_case)
+                # print(session['annotations'])
             elif 'design_topic' in request.form and 'annotations' in session:
                 design_topic = request.form.get("design_topic")
                 session['new_design_proposal'] = generate_design_proposal(design_topic, session['annotations'])
