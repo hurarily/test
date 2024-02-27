@@ -27,7 +27,7 @@ conn = psycopg2.connect(
     port="5432",
     user="database_4mya_user",
     password="zRZq7ozujDakxIlhNSlweDkA8v8xTzLn",
-    db="database_4mya")
+    database="database_4mya")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS `users` (`UID` int(40) AUTO_INCREMENT, `account` VARCHAR(255), `password` VARCHAR(255), PRIMARY KEY (`UID`))")
 cursor.execute("CREATE TABLE IF NOT EXISTS `data` (`UID` int(40), `case` VARCHAR(255), `annotation` LONGTEXT, `proposal` LONGTEXT, `imageurl` LONGTEXT)")
