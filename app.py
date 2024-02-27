@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from openai import OpenAI
-import os
 import mysql.connector
 
 app = Flask(__name__)
