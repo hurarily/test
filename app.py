@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from openai import OpenAI
-import mysql.connector
+# import mysql.connector
+import psycopg2
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
@@ -21,7 +22,7 @@ client = OpenAI(api_key='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')
 #     password="root",
 #     database="db1")
 # cursor = conn.cursor()
-conn = mysql.connector.connect(
+conn = psycopg2.connect(
     host="dpg-cneu69uv3ddc73addcr0-a",
     port="5432",
     user="database_4mya_user",
