@@ -24,11 +24,11 @@ client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 #     database="db1")
 # cursor = conn.cursor()
 conn = psycopg2.connect(
-    host="dpg-cneu69uv3ddc73addcr0-a",
+    host="dpg-cngnlea0si5c73bcpfug-a",
     port="5432",
-    user="database_4mya_user",
-    password="zRZq7ozujDakxIlhNSlweDkA8v8xTzLn",
-    database="database_4mya")
+    user="database_zjy8_user",
+    password="vHybf8HlxLUdvjHBQYx87gxO78DS3yGw",
+    database="database_zjy8")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account TEXT, password TEXT)")
 cursor.execute("CREATE TABLE IF NOT EXISTS data (UID INT, _case TEXT, annotation TEXT, proposal TEXT, imageurl TEXT)")
