@@ -164,7 +164,7 @@ def generate_image_from_text(text):
         response = client.images.generate(
             model="dall-e-3",
             prompt=text,
-            size="512x512",
+            size="1024x1024",
             quality="standard",
             n=1,
         )
