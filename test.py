@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from openai import OpenAI
 import os
-# import mysql.connector
-import psycopg2
+import mysql.connector
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
@@ -10,28 +9,21 @@ app.secret_key = 'your_secret_key'  # Set a secret key for session management
 # 实例化 OpenAI 客户端
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
-# conn = mysql.connector.connect(
-#     host="localhost",
-#     user="root",
-#     password="root")
-# cursor = conn.cursor()
-# cursor.execute("DROP DATABASE db1")
-# cursor.execute("CREATE DATABASE IF NOT EXISTS db1")
-# conn = mysql.connector.connect(
-#     host="localhost",
-#     user="root",
-#     password="root",
-#     database="db1")
-# cursor = conn.cursor()
-conn = psycopg2.connect(
-    host="dpg-cneu69uv3ddc73addcr0-a",
-    port="5432",
-    user="database_4mya_user",
-    password="zRZq7ozujDakxIlhNSlweDkA8v8xTzLn",
-    database="database_4mya")
+conn = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root")
 cursor = conn.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account VARCHAR(255), password VARCHAR(255))")
-cursor.execute("CREATE TABLE IF NOT EXISTS data (UID INT, _case TEXT, annotation TEXT, proposal TEXT, imageurl TEXT)")
+cursor.execute("DROP DATABASE db1")
+cursor.execute("CREATE DATABASE IF NOT EXISTS db1")
+conn = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root",
+    database="db1")
+cursor = conn.cursor()
+cursor.execute("CREATE TABLE IF NOT EXISTS `users` (`UID` int(40) AUTO_INCREMENT, `account` VARCHAR(255), `password` VARCHAR(255), PRIMARY KEY (`UID`))")
+cursor.execute("CREATE TABLE IF NOT EXISTS `data` (`UID` int(40), `case` VARCHAR(255), `annotation` LONGTEXT, `proposal` LONGTEXT, `imageurl` LONGTEXT)")
 
 @app.route('/')
 def login():
@@ -73,7 +65,7 @@ def generate_image():
         design_proposal = session['new_design_proposal']
         image_url = generate_image_from_text(design_proposal)
         cursor.execute(
-            'INSERT INTO data (UID, _case, annotation, proposal, imageurl) VALUES (%s, %s, %s, %s, %s)', \
+            'INSERT INTO `data` (`UID`, `case`, `annotation`, `proposal`, `imageurl`) VALUES (%s, %s, %s, %s, %s)', \
             (session['user']['id'], session['case'], session['annotations'], design_proposal, image_url))
         return render_template('image.html', image_url=image_url, session=session)
     return redirect(url_for('index'))
@@ -198,4 +190,4 @@ def generate_design_proposal(design_topic, annotations):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5432)
+    app.run(debug=True)
