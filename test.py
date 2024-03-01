@@ -23,7 +23,7 @@ conn = mysql.connector.connect(
     database="db1")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS `users` (`UID` int(40) AUTO_INCREMENT, `account` VARCHAR(255), `password` VARCHAR(255), PRIMARY KEY (`UID`))")
-cursor.execute("CREATE TABLE IF NOT EXISTS `data` (`UID` int(40), `case` VARCHAR(255), `annotation` LONGTEXT, `proposal` LONGTEXT, `imageurl` LONGTEXT)")
+cursor.execute("CREATE TABLE IF NOT EXISTS `data` (`UID` int(40), `case` LONGTEXT, `annotation` LONGTEXT, `proposal` LONGTEXT, `imageurl` LONGTEXT)")
 
 @app.route('/')
 def login():
