@@ -24,14 +24,14 @@ client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 #     database="db1")
 # cursor = conn.cursor()
 conn = psycopg2.connect(
-    host="dpg-cngnqjnsc6pc73av943g-a",
+    host="dpg-cnmt4j8l6cac73fdp0lg-a",
     port="5432",
-    user="database_bsf7_user",
-    password="E9uemMrfbV2LLjGEHYEslOwRfFYvvwo0",
-    database="database_bsf7")
+    user="database_a281_user",
+    password="pIzutjPuwzrSVmqZ3zttP5hOX7yJMLj5",
+    database="database_a281")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account TEXT, password TEXT)")
-cursor.execute("CREATE TABLE IF NOT EXISTS data (UID INT, _case TEXT, annotation TEXT, proposal TEXT, imageurl TEXT)")
+cursor.execute("CREATE TABLE IF NOT EXISTS data (account TEXT, _case TEXT, annotation TEXT, proposal TEXT, imageurl TEXT)")
 
 user_status = {}
 
@@ -76,8 +76,8 @@ def generate_image(account):
         design_proposal = user_status[account]['new_design_proposal']
         image_url = generate_image_from_text(design_proposal)
         cursor.execute(
-            'INSERT INTO data (UID, _case, annotation, proposal, imageurl) VALUES (%s, %s, %s, %s, %s)', \
-            (session['user']['id'], session['case'], session['annotations'], design_proposal, image_url))
+            'INSERT INTO `data` (`account`, `_case`, `annotation`, `proposal`, `imageurl`) VALUES (%s, %s, %s, %s, %s)', \
+            (account, user_status[account]['case'], user_status[account]['annotations'], design_proposal, image_url))
         return render_template('image.html', image_url=image_url, session=user_status[account], account=account)
     return redirect(url_for('index', account=account))
 
@@ -155,7 +155,7 @@ def listhistory(account):
     if user_status[account]['login'] == False:
         return redirect(url_for('login'))
     else:
-        cursor.execute('SELECT * FROM data WHERE UID = %s', (session['user']['id'], ))
+        cursor.execute('SELECT * FROM data WHERE UID = %s', (account, ))
         rows = cursor.fetchall()
         table = ''
         for row in rows:
