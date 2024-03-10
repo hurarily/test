@@ -76,7 +76,7 @@ def generate_image(account):
         design_proposal = user_status[account]['new_design_proposal']
         image_url = generate_image_from_text(design_proposal)
         cursor.execute(
-            'INSERT INTO `data` (`account`, `_case`, `annotation`, `proposal`, `imageurl`) VALUES (%s, %s, %s, %s, %s)', \
+            'INSERT INTO `data` (`account`, `case`, `annotation`, `proposal`, `imageurl`) VALUES (%s, %s, %s, %s, %s)', \
             (account, user_status[account]['case'], user_status[account]['annotations'], design_proposal, image_url))
         return render_template('image.html', image_url=image_url, session=user_status[account], account=account)
     return redirect(url_for('index', account=account))
@@ -97,8 +97,6 @@ def logining():
         user = cursor.fetchone()
 
         if user:
-            if account not in user_status:
-                user_status[account] = {'login': False, 'case': None, 'annotations': None, 'new_design_proposal': None}
             user_status[account]['login'] = True
             return 'success'
         else:
@@ -155,7 +153,7 @@ def listhistory(account):
     if user_status[account]['login'] == False:
         return redirect(url_for('login'))
     else:
-        cursor.execute('SELECT * FROM data WHERE UID = %s', (account, ))
+        cursor.execute('SELECT * FROM data WHERE account = %s', (account, ))
         rows = cursor.fetchall()
         table = ''
         for row in rows:
