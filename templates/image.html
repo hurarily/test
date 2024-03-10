@@ -8,7 +8,8 @@
 
 <body>
     <h1>Generated Image</h1>
-    <p><a href="{{ url_for('index') }}">return</a></p>
+    <p><a href="{{ url_for('index', account=account) }}">return
+        </a></p>
     {% if image_url %}
     <img src="{{ image_url }}" alt="Generated Image">
     {% else %}

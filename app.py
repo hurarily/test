@@ -33,50 +33,53 @@ cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account TEXT, password TEXT)")
 cursor.execute("CREATE TABLE IF NOT EXISTS data (UID INT, _case TEXT, annotation TEXT, proposal TEXT, imageurl TEXT)")
 
+user_status = {}
+
 @app.route('/')
 def login():
     return render_template('login.html')
 
 
-@app.route('/home', methods=['GET', 'POST'])
-def index():
-    print(session)
-    if not session:
+@app.route('/home/<account>', methods=['GET', 'POST'])
+def index(account):
+    if request.form.get('account'):
+        account = request.form.get('account')
+    if user_status[account]['login'] == False:
         return redirect(url_for('login'))
     else:
         if request.method == 'POST':
             if 'design_case' in request.form:
                 design_case = (request.form.get("design_case"))
-                session['case'] = str(design_case)
-                session['annotations'] = generate_annotations(design_case)
-                print(session['annotations'])
-            elif 'design_topic' in request.form and 'annotations' in session:
+                user_status[account]['case'] = str(design_case)
+                user_status[account]['annotations'] = generate_annotations(design_case)
+                print(user_status[account]['annotations'])
+            elif 'design_topic' in request.form and user_status[account]['annotations'] is not None:
                 design_topic = request.form.get("design_topic")
-                session['new_design_proposal'] = generate_design_proposal(design_topic, session['annotations'])
-                print(session['new_design_proposal'])
+                user_status[account]['new_design_proposal'] = generate_design_proposal(design_topic, user_status[account]['annotations'])
+                print(user_status[account]['new_design_proposal'])
 
-        return render_template('index_a.html', session=session)
+        return render_template('index_a.html', session=user_status[account], account=account)
 
 
-@app.route('/refresh', methods=['GET'])
-def refresh():
+@app.route('/refresh/<account>', methods=['GET'])
+def refresh(account):
     # 清除会话中的数据
-    session.pop('case', None)
-    session.pop('annotations', None)
-    session.pop('new_design_proposal', None)
-    return redirect(url_for('index'))
+    user_status[account]['case'] = None
+    user_status[account]['annotations'] = None
+    user_status[account]['new_design_proposal'] = None
+    return redirect(url_for('index', account=account))
 
 
-@app.route('/generate-image', methods=['GET', 'POST'])
-def generate_image():
-    if 'new_design_proposal' in session:
-        design_proposal = session['new_design_proposal']
+@app.route('/generate-image/<account>', methods=['GET', 'POST'])
+def generate_image(account):
+    if user_status[account]['new_design_proposal'] is not None:
+        design_proposal = user_status[account]['new_design_proposal']
         image_url = generate_image_from_text(design_proposal)
         cursor.execute(
-            'INSERT INTO data (UID, _case, annotation, proposal, imageurl) VALUES (%s, %s, %s, %s, %s)', \
-            (session['user']['id'], session['case'], session['annotations'], design_proposal, image_url))
-        return render_template('image.html', image_url=image_url, session=session)
-    return redirect(url_for('index'))
+            'INSERT INTO `data` (`account`, `case`, `annotation`, `proposal`, `imageurl`) VALUES (%s, %s, %s, %s, %s)', \
+            (account, user_status[account]['case'], user_status[account]['annotations'], design_proposal, image_url))
+        return render_template('image.html', image_url=image_url, session=user_status[account], account=account)
+    return redirect(url_for('index', account=account))
 
 
 @app.route('/register')
@@ -94,10 +97,7 @@ def logining():
         user = cursor.fetchone()
 
         if user:
-            session['user'] = {
-                'id': user[0],
-                'account': user[1],
-            }
+            user_status[account]['login'] = True
             return 'success'
         else:
             return 'fail'
@@ -129,6 +129,9 @@ def adduser():
                 'INSERT INTO users (account, password) VALUES (%s, %s)', (account, password))
             conn.commit()
             successreg = 'success'
+            cursor.execute('SELECT * FROM users WHERE account = %s', (account, ))
+            temp = cursor.fetchone()
+            user_status[temp[1]] = {'login': False, 'case': None, 'annotations': None, 'new_design_proposal': None}
 
     if not successreg:
         r = {"text": 'fail', "msgacc": msgacc, "msgpwd": msgpwd, "msgpwd2": msgpwd2}
@@ -137,26 +140,25 @@ def adduser():
         return {"text": 'success'}
     
 
-@app.route('/logout')
-def logout():
-    session.pop('case', None)
-    session.pop('annotations', None)
-    session.pop('new_design_proposal', None)
-    session.pop('user', None)
+@app.route('/logout/<account>')
+def logout(account):
+    cursor.execute('SELECT * FROM users WHERE account = %s', (account, ))
+    temp = cursor.fetchone()
+    user_status[temp[1]]['login'] = False
     return redirect(url_for('login'))
 
 
-@app.route('/history')
-def listhistory():
-    if not session:
+@app.route('/history/<account>')
+def listhistory(account):
+    if user_status[account]['login'] == False:
         return redirect(url_for('login'))
     else:
-        cursor.execute('SELECT * FROM data WHERE UID = %s', (session['user']['id'], ))
+        cursor.execute('SELECT * FROM data WHERE account = %s', (account, ))
         rows = cursor.fetchall()
         table = ''
         for row in rows:
             table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=%s>%s</td></tr>' % (row[1], row[2], row[3], row[4], row[4])
-        return render_template('history.html', session=session, table=table)
+        return render_template('history.html', session=user_status[account], table=table, account=account)
     
 
 def generate_image_from_text(text):

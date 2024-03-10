@@ -8,6 +8,26 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
   <script>
+    function post_to_url(path, params, method = 'post') {
+      const form = document.createElement('form');
+      form.method = method;
+      form.action = path;
+
+      for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+          const hiddenField = document.createElement('input');
+          hiddenField.type = 'hidden';
+          hiddenField.name = key;
+          hiddenField.value = params[key];
+
+          form.appendChild(hiddenField);
+        }
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+
     function login() {
       axios.post("{{ url_for('logining') }}", {
         'account': document.getElementById('account').value,
@@ -19,7 +39,7 @@
             alert('Login failed!')
           }
           else {
-            window.location.href = "{{ url_for('index') }}"
+            post_to_url('/home/' + document.getElementById('account').value, { 'account': document.getElementById('account').value })
           }
         })
     }
