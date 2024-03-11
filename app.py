@@ -52,12 +52,10 @@ def index(account):
                 design_case = (request.form.get("design_case"))
                 user_status[account]['case'] = str(design_case)
                 user_status[account]['annotations'] = generate_annotations(design_case)
-                print(user_status[account]['annotations'])
             elif 'design_topic' in request.form and user_status[account]['annotations'] is not None:
                 design_topic = request.form.get("design_topic")
                 user_status[account]['topic'] = design_topic
                 user_status[account]['new_design_proposal'] = generate_design_proposal(design_topic, user_status[account]['annotations'])
-                print(user_status[account]['new_design_proposal'])
 
         return render_template('index_a.html', session=user_status[account], account=account)
 
@@ -78,7 +76,7 @@ def generate_image(account):
         design_proposal = user_status[account]['new_design_proposal']
         image_url = generate_image_from_text(design_proposal)
         cursor.execute(
-            'INSERT INTO data (account, _case, annotation, topic, proposal, imageurl) VALUES (%s, %s, %s, %s, %s)', \
+            'INSERT INTO data (account, _case, annotation, topic, proposal, imageurl) VALUES (%s, %s, %s, %s, %s, %s)', \
             (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['topic'], design_proposal, image_url))
         return render_template('image.html', image_url=image_url, session=user_status[account], account=account)
     return redirect(url_for('index', account=account))
