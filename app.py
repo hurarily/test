@@ -31,7 +31,7 @@ conn = psycopg2.connect(
     database="database_o0qr")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account TEXT, password TEXT)")
-cursor.execute("CREATE TABLE IF NOT EXISTS data (account TEXT, _case TEXT, annotation TEXT, proposal TEXT, imageurl TEXT)")
+cursor.execute("CREATE TABLE IF NOT EXISTS data (account TEXT, _case TEXT, annotation TEXT, topic TEXT, proposal TEXT, imageurl TEXT)")
 
 user_status = {}
 
@@ -55,6 +55,7 @@ def index(account):
                 print(user_status[account]['annotations'])
             elif 'design_topic' in request.form and user_status[account]['annotations'] is not None:
                 design_topic = request.form.get("design_topic")
+                user_status[account]['topic'] = design_topic
                 user_status[account]['new_design_proposal'] = generate_design_proposal(design_topic, user_status[account]['annotations'])
                 print(user_status[account]['new_design_proposal'])
 
@@ -66,6 +67,7 @@ def refresh(account):
     # 清除会话中的数据
     user_status[account]['case'] = None
     user_status[account]['annotations'] = None
+    user_status[account]['topic'] = None
     user_status[account]['new_design_proposal'] = None
     return redirect(url_for('index', account=account))
 
@@ -76,8 +78,8 @@ def generate_image(account):
         design_proposal = user_status[account]['new_design_proposal']
         image_url = generate_image_from_text(design_proposal)
         cursor.execute(
-            'INSERT INTO data (account, _case, annotation, proposal, imageurl) VALUES (%s, %s, %s, %s, %s)', \
-            (account, user_status[account]['case'], user_status[account]['annotations'], design_proposal, image_url))
+            'INSERT INTO data (account, _case, annotation, topic, proposal, imageurl) VALUES (%s, %s, %s, %s, %s)', \
+            (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['topic'], design_proposal, image_url))
         return render_template('image.html', image_url=image_url, session=user_status[account], account=account)
     return redirect(url_for('index', account=account))
 
@@ -157,7 +159,7 @@ def listhistory(account):
         rows = cursor.fetchall()
         table = ''
         for row in rows:
-            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=%s>%s</td></tr>' % (row[1], row[2], row[3], row[4], row[4])
+            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href=%s>%s</td></tr>' % (row[1], row[2], row[3], row[4], row[5], row[5])
         return render_template('history.html', session=user_status[account], table=table, account=account)
     
 
