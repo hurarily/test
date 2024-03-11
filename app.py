@@ -133,7 +133,7 @@ def adduser():
             successreg = 'success'
             cursor.execute('SELECT * FROM users WHERE account = %s', (account, ))
             temp = cursor.fetchone()
-            user_status[temp[1]] = {'login': False, 'case': None, 'annotations': None, 'new_design_proposal': None}
+            user_status[temp[1]] = {'login': False, 'case': None, 'topic': None, 'annotations': None, 'new_design_proposal': None}
 
     if not successreg:
         r = {"text": 'fail', "msgacc": msgacc, "msgpwd": msgpwd, "msgpwd2": msgpwd2}
