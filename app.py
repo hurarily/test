@@ -97,6 +97,8 @@ def logining():
         user = cursor.fetchone()
 
         if user:
+            if account not in user_status:
+                user_status[account] = {'login': False, 'case': None, 'topic': None, 'annotations': None, 'new_design_proposal': None}
             user_status[account]['login'] = True
             return 'success'
         else:
