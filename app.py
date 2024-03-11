@@ -47,17 +47,58 @@ def index(account):
     if user_status[account]['login'] == False:
         return redirect(url_for('login'))
     else:
+        image_url = None
         if request.method == 'POST':
             if 'design_case' in request.form:
                 design_case = (request.form.get("design_case"))
                 user_status[account]['case'] = str(design_case)
-                user_status[account]['annotations'] = generate_annotations(design_case)
+                temp = generate_annotations(design_case)
+                if '2. Concept:' in temp:
+                    appearance = temp.split('Appearance: ')[1].split('2. Concept:')[0]
+                elif 'Concept:' in temp:
+                    appearance = temp.split('Appearance: ')[1].split('Concept:')[0]
+                if '3. Usage Scenarios:' in temp:
+                    concept = temp.split('Concept: ')[1].split('3. Usage Scenarios:')[0]
+                    if '4. Materials:' in temp:
+                        usageScenarios = temp.split('3. Usage Scenarios: ')[1].split('4. Materials:')[0]
+                    elif 'Materials:' in temp:
+                        usageScenarios = temp.split('3. Usage Scenarios: ')[1].split('Materials:')[0]
+                elif '3. Usage scenarios:' in temp:
+                    concept = temp.split('Concept: ')[1].split('3. Usage scenarios:')[0]
+                    if '4. Materials:' in temp:
+                        usageScenarios = temp.split('3. Usage scenarios: ')[1].split('4. Materials:')[0]
+                    elif 'Materials:' in temp:
+                        usageScenarios = temp.split('3. Usage scenarios: ')[1].split('Materials:')[0]
+                elif 'Usage Scenarios:' in temp:
+                    concept = temp.split('Concept: ')[1].split('Usage Scenarios:')[0]
+                    if '4. Materials:' in temp:
+                        usageScenarios = temp.split('Usage Scenarios: ')[1].split('4. Materials:')[0]
+                    elif 'Materials:' in temp:
+                        usageScenarios = temp.split('Usage Scenarios: ')[1].split('Materials:')[0]
+                elif 'Usage scenarios:' in temp:
+                    concept = temp.split('Concept: ')[1].split('Usage scenarios:')[0]
+                    if '4. Materials:' in temp:
+                        usageScenarios = temp.split('Usage scenarios: ')[1].split('4. Materials:')[0]
+                    elif 'Materials:' in temp:
+                        usageScenarios = temp.split('Usage scenarios: ')[1].split('Materials:')[0]
+                if '5. Functionality' in temp:
+                    materials = temp.split('Materials: ')[1].split('5. Functionality:')[0]
+                elif 'Functionality' in temp:
+                    materials = temp.split('Materials: ')[1].split('Functionality:')[0]
+                functionality = temp.split('Functionality: ')[1]
+                user_status[account]['annotations_split'] = {'appearance': appearance, 'concept': concept, 'usageScenarios': usageScenarios, 'materials': materials, 'functionality': functionality}
+                user_status[account]['annotations'] = temp
             elif 'design_topic' in request.form and user_status[account]['annotations'] is not None:
                 design_topic = request.form.get("design_topic")
                 user_status[account]['topic'] = design_topic
                 user_status[account]['new_design_proposal'] = generate_design_proposal(design_topic, user_status[account]['annotations'])
+            elif user_status[account]['new_design_proposal'] is not None:
+                image_url = generate_image_from_text(user_status[account]['new_design_proposal'])
+                cursor.execute(
+                    'INSERT INTO data (account, _case, annotation, topic, proposal, imageurl) VALUES (%s, %s, %s, %s, %s, %s)', \
+                        (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['topic'], user_status[account]['new_design_proposal'], image_url))
 
-        return render_template('index_a.html', session=user_status[account], account=account)
+        return render_template('index_a.html', session=user_status[account], account=account, image_url=image_url)
 
 
 @app.route('/refresh/<account>', methods=['GET'])
@@ -67,18 +108,7 @@ def refresh(account):
     user_status[account]['annotations'] = None
     user_status[account]['topic'] = None
     user_status[account]['new_design_proposal'] = None
-    return redirect(url_for('index', account=account))
-
-
-@app.route('/generate-image/<account>', methods=['GET', 'POST'])
-def generate_image(account):
-    if user_status[account]['new_design_proposal'] is not None:
-        design_proposal = user_status[account]['new_design_proposal']
-        image_url = generate_image_from_text(design_proposal)
-        cursor.execute(
-            'INSERT INTO data (account, _case, annotation, topic, proposal, imageurl) VALUES (%s, %s, %s, %s, %s, %s)', \
-            (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['topic'], design_proposal, image_url))
-        return render_template('image.html', image_url=image_url, session=user_status[account], account=account)
+    user_status[account]['annotations_split'] = None
     return redirect(url_for('index', account=account))
 
 
@@ -144,9 +174,11 @@ def adduser():
 
 @app.route('/logout/<account>')
 def logout(account):
-    cursor.execute('SELECT * FROM users WHERE account = %s', (account, ))
-    temp = cursor.fetchone()
-    user_status[temp[1]]['login'] = False
+    user_status[account]['login'] = False
+    user_status[account]['case'] = None
+    user_status[account]['annotations'] = None
+    user_status[account]['new_design_proposal'] = None
+    user_status[account]['annotations_split'] = None
     return redirect(url_for('login'))
 
 

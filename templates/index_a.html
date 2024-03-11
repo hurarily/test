@@ -22,13 +22,25 @@
     </form>
     {% endif %}
 
-    {% if session['annotations'] %}
+    {% if session['annotations'] and not session['new_design_proposal'] %}
     <!-- 顯示生成的設計注解 -->
     <h2>Generated Annotations:</h2>
 
     <!-- 第二部分：輸入設計題目 -->
     <form method="post">
-        <textarea name="design_topic" rows="30" cols="100">{{ session['annotations'] }}</textarea><br><br>
+        Appearance:<br>
+        <textarea id="appearance" rows="5"
+            cols="100">{{ session['annotations_split']['appearance'] }}</textarea><br><br>
+        Concept:<br>
+        <textarea id="concept" rows="5" cols="100">{{ session['annotations_split']['concept'] }}</textarea><br><br>
+        Usage Scenarios:<br>
+        <textarea id="usageScenarios" rows="5"
+            cols="100">{{ session['annotations_split']['usageScenarios'] }}</textarea><br><br>
+        Materials:<br>
+        <textarea id="materials" rows="5" cols="100">{{ session['annotations_split']['materials'] }}</textarea><br><br>
+        Functionality:<br>
+        <textarea id="functionality" rows="5"
+            cols="100">{{ session['annotations_split']['functionality'] }}</textarea><br><br>
         <label for="design_topic">Design Topic:</label><br>
         <input type="text" id="design_topic" name="design_topic" placeholder="Enter the design topic..."><br><br>
         <input type="submit" value="Generate a Design Proposal">
@@ -41,9 +53,14 @@
     <textarea name="design_topic" rows="30" cols="100">{{ session['new_design_proposal'] }}</textarea><br><br>
 
     <!-- 添加生成图像的按钮 -->
-    <form action="{{ url_for('generate_image', account=account) }}" method="post">
+    <form method="post">
         <input type="submit" value="Generate an Image">
     </form>
+
+    {% if image_url %}
+    <img src="{{ image_url }}" alt="Generated Image" width="512" height="512">
+    {% endif %}
+
     {% endif %}
 </body>
 
