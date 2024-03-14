@@ -41,9 +41,10 @@ def index(account):
         image_url = None
         if request.method == 'POST':
             if 'design_case' in request.form:
-                design_case = (request.form.get("design_case"))
+                design_case = request.form.get("design_case")
                 user_status[account]['case'] = str(design_case)
                 temp = generate_annotations(design_case)
+                print(temp)
                 if '2. Concept:' in temp:
                     appearance = temp.split('Appearance: ')[1].split('2. Concept:')[0]
                 elif 'Concept:' in temp:
@@ -79,11 +80,9 @@ def index(account):
                 functionality = temp.split('Functionality: ')[1]
                 user_status[account]['annotations_split'] = {'appearance': appearance, 'concept': concept, 'usageScenarios': usageScenarios, 'materials': materials, 'functionality': functionality}
                 user_status[account]['annotations'] = temp
-                print(user_status[account]['annotations'])
             elif 'design_topic' in request.form and user_status[account]['annotations'] is not None:
                 design_topic = request.form.get("design_topic")
                 user_status[account]['new_design_proposal'] = generate_design_proposal(design_topic, user_status[account]['annotations'])
-                print(user_status[account]['new_design_proposal'])
             elif user_status[account]['new_design_proposal'] is not None:
                 image_url = generate_image_from_text(user_status[account]['new_design_proposal'])
                 cursor.execute(
@@ -191,8 +190,16 @@ def listhistory(account):
         rows = cursor.fetchall()
         table = ''
         for row in rows:
-            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=%s>%s</td></tr>' % (row[1], row[2], row[3], row[4], row[4])
+            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=%s>%s</td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], row[4], row[4], row[4])
         return render_template('history.html', session=user_status[account], table=table, account=account)
+    
+
+@app.route('/del/<account>', methods=['POST'])
+def delete(account):
+    url = request.json.get('url')
+    cursor.execute('DELETE FROM `data` WHERE `imageurl` = %s', (url, ))
+    conn.commit()
+    return redirect(url_for('index', account=account))
     
 
 def generate_image_from_text(text):

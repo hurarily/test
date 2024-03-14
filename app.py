@@ -9,12 +9,11 @@ app.secret_key = 'your_secret_key'
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 conn = psycopg2.connect(
-    host="dpg-cnpfqhnsc6pc73frhs4g-a",
+    host="dpg-cnpjlivsc6pc73fs8110-a",
     port="5432",
-    user="database_l87o_user",
+    user="database_qoiv_user",
     password="OEAmA6H12j51TLlXQBwj4e9pEZt5lnoi",
-    database="database_l87o",
-    sslmode="disable")
+    database="database_qoiv")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account TEXT, password TEXT)")
 cursor.execute("CREATE TABLE IF NOT EXISTS historyData (account TEXT, _case TEXT, annotation TEXT, topic TEXT, proposal TEXT, imageurl TEXT)")
@@ -39,6 +38,7 @@ def index(account):
                 design_case = (request.form.get("design_case"))
                 user_status[account]['case'] = str(design_case)
                 temp = generate_annotations(design_case)
+                print(temp)
                 if '2. Concept:' in temp:
                     appearance = temp.split('Appearance: ')[1].split('2. Concept:')[0]
                 elif 'Concept:' in temp:
@@ -83,6 +83,7 @@ def index(account):
                 cursor.execute(
                     'INSERT INTO historyData (account, _case, annotation, topic, proposal, imageurl) VALUES (%s, %s, %s, %s, %s, %s)', \
                         (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['topic'], user_status[account]['new_design_proposal'], image_url))
+                conn.commit()
 
         return render_template('index_a.html', session=user_status[account], account=account, image_url=image_url)
 
@@ -176,8 +177,16 @@ def listhistory(account):
         rows = cursor.fetchall()
         table = ''
         for row in rows:
-            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href=%s>%s</td></tr>' % (row[1], row[2], row[3], row[4], row[5], row[5])
+            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href=%s>%s</td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], row[4], row[5], row[5], row[5])
         return render_template('history.html', session=user_status[account], table=table, account=account)
+    
+
+@app.route('/del/<account>', methods=['POST'])
+def delete(account):
+    url = request.json.get('url')
+    cursor.execute('DELETE FROM historyData WHERE imageurl = %s', (url, ))
+    conn.commit()
+    return redirect(url_for('listhistory', account=account))
     
 
 def generate_image_from_text(text):
