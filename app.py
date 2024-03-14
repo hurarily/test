@@ -171,7 +171,7 @@ def listhistory(account):
     if user_status[account]['login'] == False:
         return redirect(url_for('login'))
     else:
-        cursor.execute('SELECT * FROM data')
+        cursor.execute('SELECT * FROM data WHERE account = %s', (account, ))
         rows = cursor.fetchall()
         table = ''
         for row in rows:
