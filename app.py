@@ -1,28 +1,13 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from openai import OpenAI
 import os
-# import mysql.connector
 import psycopg2
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Set a secret key for session management
+app.secret_key = 'your_secret_key'
 
-# 实例化 OpenAI 客户端
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
-# conn = mysql.connector.connect(
-#     host="localhost",
-#     user="root",
-#     password="root")
-# cursor = conn.cursor()
-# cursor.execute("DROP DATABASE db1")
-# cursor.execute("CREATE DATABASE IF NOT EXISTS db1")
-# conn = mysql.connector.connect(
-#     host="localhost",
-#     user="root",
-#     password="root",
-#     database="db1")
-# cursor = conn.cursor()
 conn = psycopg2.connect(
     host="dpg-cnnh6qvjbltc738e7mpg-a",
     port="5432",
@@ -103,7 +88,6 @@ def index(account):
 
 @app.route('/refresh/<account>', methods=['GET'])
 def refresh(account):
-    # 清除会话中的数据
     user_status[account]['case'] = None
     user_status[account]['annotations'] = None
     user_status[account]['topic'] = None
@@ -187,7 +171,7 @@ def listhistory(account):
     if user_status[account]['login'] == False:
         return redirect(url_for('login'))
     else:
-        cursor.execute('SELECT * FROM data WHERE account = %s', (account, ))
+        cursor.execute('SELECT * FROM data')
         rows = cursor.fetchall()
         table = ''
         for row in rows:

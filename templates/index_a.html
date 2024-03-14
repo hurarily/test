@@ -12,7 +12,6 @@
     <p><a href="{{ url_for('refresh', account=account) }}">Refresh</a></p>
     <p><a href="{{ url_for('logout', account=account) }}">Logout</a></p>
 
-    <!-- 第一部分：輸入設計案例描述 -->
     {% if not session['annotations'] %}
     <form method="post">
         <label for="design_case">Design Case Description:</label><br>
@@ -23,10 +22,8 @@
     {% endif %}
 
     {% if session['annotations'] and not session['new_design_proposal'] %}
-    <!-- 顯示生成的設計注解 -->
     <h2>Generated Annotations:</h2>
 
-    <!-- 第二部分：輸入設計題目 -->
     <form method="post">
         Appearance:<br>
         <textarea id="appearance" rows="5"
@@ -48,11 +45,9 @@
     {% endif %}
 
     {% if session['new_design_proposal'] %}
-    <!-- 顯示新的設計提案 -->
     <h2>New Design Proposal:</h2>
     <textarea name="design_topic" rows="30" cols="100">{{ session['new_design_proposal'] }}</textarea><br><br>
 
-    <!-- 添加生成图像的按钮 -->
     <form method="post">
         <input type="submit" value="Generate an Image">
     </form>

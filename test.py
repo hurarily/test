@@ -4,9 +4,8 @@ import os
 import mysql.connector
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Set a secret key for session management
+app.secret_key = 'your_secret_key'
 
-# 实例化 OpenAI 客户端
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 conn = mysql.connector.connect(
@@ -96,7 +95,6 @@ def index(account):
 
 @app.route('/refresh/<account>', methods=['GET'])
 def refresh(account):
-    # 清除会话中的数据
     user_status[account]['case'] = None
     user_status[account]['annotations'] = None
     user_status[account]['new_design_proposal'] = None
