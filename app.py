@@ -9,14 +9,14 @@ app.secret_key = 'your_secret_key'
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 conn = psycopg2.connect(
-    host="dpg-cnnh6qvjbltc738e7mpg-a",
+    host="dpg-cnpfqhnsc6pc73frhs4g-a",
     port="5432",
-    user="database_7t6y_user",
-    password="99PN2s0JjpJR5AUo7urO8SdYEftevRG8",
-    database="database_7t6y")
+    user="database_l87o_user",
+    password="OEAmA6H12j51TLlXQBwj4e9pEZt5lnoi",
+    database="database_l87o")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account TEXT, password TEXT)")
-cursor.execute("CREATE TABLE IF NOT EXISTS data (account TEXT, _case TEXT, annotation TEXT, topic TEXT, proposal TEXT, imageurl TEXT)")
+cursor.execute("CREATE TABLE IF NOT EXISTS historyData (account TEXT, _case TEXT, annotation TEXT, topic TEXT, proposal TEXT, imageurl TEXT)")
 
 user_status = {}
 
@@ -80,7 +80,7 @@ def index(account):
             elif user_status[account]['new_design_proposal'] is not None:
                 image_url = generate_image_from_text(user_status[account]['new_design_proposal'])
                 cursor.execute(
-                    'INSERT INTO data (account, _case, annotation, topic, proposal, imageurl) VALUES (%s, %s, %s, %s, %s, %s)', \
+                    'INSERT INTO historyData (account, _case, annotation, topic, proposal, imageurl) VALUES (%s, %s, %s, %s, %s, %s)', \
                         (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['topic'], user_status[account]['new_design_proposal'], image_url))
 
         return render_template('index_a.html', session=user_status[account], account=account, image_url=image_url)
@@ -171,7 +171,7 @@ def listhistory(account):
     if user_status[account]['login'] == False:
         return redirect(url_for('login'))
     else:
-        cursor.execute('SELECT * FROM data WHERE account = %s', (account, ))
+        cursor.execute('SELECT * FROM historyData WHERE account = %s', (account, ))
         rows = cursor.fetchall()
         table = ''
         for row in rows:
