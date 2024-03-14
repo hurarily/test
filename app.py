@@ -13,7 +13,8 @@ conn = psycopg2.connect(
     port="5432",
     user="database_l87o_user",
     password="OEAmA6H12j51TLlXQBwj4e9pEZt5lnoi",
-    database="database_l87o")
+    database="database_l87o",
+    sslmode="disable")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account TEXT, password TEXT)")
 cursor.execute("CREATE TABLE IF NOT EXISTS historyData (account TEXT, _case TEXT, annotation TEXT, topic TEXT, proposal TEXT, imageurl TEXT)")
