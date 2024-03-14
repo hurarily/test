@@ -12,7 +12,7 @@ conn = psycopg2.connect(
     host="dpg-cnpjlivsc6pc73fs8110-a",
     port="5432",
     user="database_qoiv_user",
-    password="OEAmA6H12j51TLlXQBwj4e9pEZt5lnoi",
+    password="BEjXQJ26VMd7jHfNZXOlBLNbLSceJEpI",
     database="database_qoiv")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, account TEXT, password TEXT)")
