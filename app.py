@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for
 from openai import OpenAI
 import os
 import psycopg2
+import pyimgur
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -19,6 +20,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS users (UID SERIAL PRIMARY KEY, accoun
 cursor.execute("CREATE TABLE IF NOT EXISTS historyData (account TEXT, _case TEXT, annotation TEXT, topic TEXT, proposal TEXT, imageurl TEXT)")
 
 user_status = {}
+IMGUR_CLIENT_ID = "4436a34ea480f93"
 
 @app.route('/')
 def login():
@@ -80,9 +82,11 @@ def index(account):
                 user_status[account]['new_design_proposal'] = generate_design_proposal(design_topic, user_status[account]['annotations'])
             elif user_status[account]['new_design_proposal'] is not None:
                 image_url = generate_image_from_text(user_status[account]['new_design_proposal'])
+                im = pyimgur.Imgur(IMGUR_CLIENT_ID)
+                uploaded_image = im.upload_image(url=image_url, title="Uploaded with PyImgur")
                 cursor.execute(
                     'INSERT INTO historyData (account, _case, annotation, topic, proposal, imageurl) VALUES (%s, %s, %s, %s, %s, %s)', \
-                        (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['topic'], user_status[account]['new_design_proposal'], image_url))
+                        (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['topic'], user_status[account]['new_design_proposal'], uploaded_image.link))
                 conn.commit()
 
         return render_template('index_a.html', session=user_status[account], account=account, image_url=image_url)
@@ -177,7 +181,7 @@ def listhistory(account):
         rows = cursor.fetchall()
         table = ''
         for row in rows:
-            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href=%s>%s</td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], row[4], row[5], row[5], row[5])
+            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><img src="%s" width="512" height="512"></td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], row[4], row[4])
         return render_template('history.html', session=user_status[account], table=table, account=account)
     
 
