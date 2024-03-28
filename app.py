@@ -174,6 +174,8 @@ def logout(account):
 
 @app.route('/history/<account>')
 def listhistory(account):
+    cursor.execute('DELETE FROM historyData WHERE proposal = %s', ("https://test-lp4s.onrender.com/history/Introducing%20the%20Eagles%20Travel%20Chair,%20a%20sleek%20and%20modern%20design%20case%20inspired%20by%20the%20iconic%20lyrics%20of", ))
+    conn.commit()
     if user_status[account]['login'] == False:
         return redirect(url_for('login'))
     else:
@@ -181,7 +183,7 @@ def listhistory(account):
         rows = cursor.fetchall()
         table = ''
         for row in rows:
-            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><img src="%s" width="512" height="512"></td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], row[4], row[4])
+            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><img src="%s" width="512" height="512"></td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], row[4], row[5], row[5])
         return render_template('history.html', session=user_status[account], table=table, account=account)
     
 
