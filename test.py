@@ -3,7 +3,7 @@ from openai import OpenAI
 import os
 import mysql.connector
 import urllib.request
-import base64
+import pyimgur
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -27,6 +27,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `users` (`UID` int(40) AUTO_INCREMENT
 cursor.execute("CREATE TABLE IF NOT EXISTS `data` (`account` VARCHAR(255), `case` LONGTEXT, `annotation` LONGTEXT, `proposal` LONGTEXT, `imageurl` LONGTEXT)")
 
 user_status = {}
+IMGUR_CLIENT_ID = "4436a34ea480f93"
 
 @app.route('/')
 def login():
@@ -99,21 +100,26 @@ def index(account):
                 image_url = generate_image_from_text(user_status[account]['new_design_proposal'])
                 while image_url is None:
                     image_url = generate_image_from_text(user_status[account]['new_design_proposal'])
-                dirPath = os.getcwd()+'\\images\\'+account
-                if not os.path.exists(dirPath):
-                    os.makedirs(dirPath)
-                imagePathRaw = user_status[account]['case'].replace('\r\n', ' ')
-                if len(imagePathRaw) > 25:
-                    imagePath = dirPath+'\\'+imagePathRaw[:25]+'...'
-                else:
-                    imagePath = dirPath+'\\'+imagePathRaw
-                cnt = 0
-                while os.path.exists(imagePath+'_'+str(cnt)+'.jpg'):
-                    cnt += 1
-                urllib.request.urlretrieve(image_url, imagePath+'_'+str(cnt)+'.jpg')
+                # dirPath = os.getcwd()+'\\images\\'+account
+                # if not os.path.exists(dirPath):
+                #     os.makedirs(dirPath)
+                # imagePathRaw = user_status[account]['case'].replace('\r\n', ' ')
+                # if len(imagePathRaw) > 25:
+                #     imagePath = dirPath+'\\'+imagePathRaw[:25]+'...'
+                # else:
+                #     imagePath = dirPath+'\\'+imagePathRaw
+                # cnt = 0
+                # while os.path.exists(imagePath+'_'+str(cnt)+'.jpg'):
+                #     cnt += 1
+                # urllib.request.urlretrieve(image_url, imagePath+'_'+str(cnt)+'.jpg')
+                im = pyimgur.Imgur(IMGUR_CLIENT_ID)
+                uploaded_image = im.upload_image(url=image_url, title="Uploaded with PyImgur")
+                print(uploaded_image.title)
+                print(uploaded_image.link)
+                print(uploaded_image.type)
                 cursor.execute(
                     'INSERT INTO `data` (`account`, `case`, `annotation`, `proposal`, `imageurl`) VALUES (%s, %s, %s, %s, %s)', \
-                    (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['new_design_proposal'], imagePath.split('\\')[-1]+'_'+str(cnt)+'.jpg'))
+                    (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['new_design_proposal'], uploaded_image.link))
 
         return render_template('index_a.html', session=user_status[account], account=account, image_url=image_url)
 
@@ -218,7 +224,7 @@ def listhistory(account):
         for row in rows:
             # with open(os.getcwd()+'\\images\\'+account+'\\'+row[4], "rb") as i:
             #     encoded_string = base64.b64encode(i.read())
-            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><img src="%s"></td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], os.getcwd()+'\\images\\'+account+'\\'+row[4], os.getcwd()+'\\images\\'+account+'\\'+row[4])
+            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><img src="%s" width="512" height="512"></td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], row[4], row[4])
         return render_template('history.html', session=user_status[account], table=table, account=account)
     
 
