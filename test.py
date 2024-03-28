@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, session, redirect, url_for
 from openai import OpenAI
 import os
 import mysql.connector
+import urllib.request
+import base64
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -44,11 +46,15 @@ def index(account):
                 design_case = request.form.get("design_case")
                 user_status[account]['case'] = str(design_case)
                 temp = generate_annotations(design_case)
+                while len(temp) < 5:
+                    temp = generate_annotations(design_case)
                 print(temp)
                 if '2. Concept:' in temp:
                     appearance = temp.split('Appearance: ')[1].split('2. Concept:')[0]
                 elif 'Concept:' in temp:
                     appearance = temp.split('Appearance: ')[1].split('Concept:')[0]
+                elif '2) Concept:' in temp:
+                    appearance = temp.split('Appearance: ')[1].split('2) Concept:')[0]
                 if '3. Usage Scenarios:' in temp:
                     concept = temp.split('Concept: ')[1].split('3. Usage Scenarios:')[0]
                     if '4. Materials:' in temp:
@@ -73,6 +79,12 @@ def index(account):
                         usageScenarios = temp.split('Usage scenarios: ')[1].split('4. Materials:')[0]
                     elif 'Materials:' in temp:
                         usageScenarios = temp.split('Usage scenarios: ')[1].split('Materials:')[0]
+                elif 'Usage Scenario:' in temp:
+                    concept = temp.split('Concept: ')[1].split('Usage Scenario:')[0]
+                    if '4. Materials:' in temp:
+                        usageScenarios = temp.split('Usage Scenario: ')[1].split('4. Materials:')[0]
+                    elif 'Materials:' in temp:
+                        usageScenarios = temp.split('Usage Scenario: ')[1].split('Materials:')[0]
                 if '5. Functionality' in temp:
                     materials = temp.split('Materials: ')[1].split('5. Functionality:')[0]
                 elif 'Functionality' in temp:
@@ -85,9 +97,23 @@ def index(account):
                 user_status[account]['new_design_proposal'] = generate_design_proposal(design_topic, user_status[account]['annotations'])
             elif user_status[account]['new_design_proposal'] is not None:
                 image_url = generate_image_from_text(user_status[account]['new_design_proposal'])
+                while image_url is None:
+                    image_url = generate_image_from_text(user_status[account]['new_design_proposal'])
+                dirPath = os.getcwd()+'\\images\\'+account
+                if not os.path.exists(dirPath):
+                    os.makedirs(dirPath)
+                imagePathRaw = user_status[account]['case'].replace('\r\n', ' ')
+                if len(imagePathRaw) > 25:
+                    imagePath = dirPath+'\\'+imagePathRaw[:25]+'...'
+                else:
+                    imagePath = dirPath+'\\'+imagePathRaw
+                cnt = 0
+                while os.path.exists(imagePath+'_'+str(cnt)+'.jpg'):
+                    cnt += 1
+                urllib.request.urlretrieve(image_url, imagePath+'_'+str(cnt)+'.jpg')
                 cursor.execute(
                     'INSERT INTO `data` (`account`, `case`, `annotation`, `proposal`, `imageurl`) VALUES (%s, %s, %s, %s, %s)', \
-                    (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['new_design_proposal'], image_url))
+                    (account, user_status[account]['case'], user_status[account]['annotations'], user_status[account]['new_design_proposal'], imagePath.split('\\')[-1]+'_'+str(cnt)+'.jpg'))
 
         return render_template('index_a.html', session=user_status[account], account=account, image_url=image_url)
 
@@ -190,7 +216,9 @@ def listhistory(account):
         rows = cursor.fetchall()
         table = ''
         for row in rows:
-            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=%s>%s</td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], row[4], row[4], row[4])
+            # with open(os.getcwd()+'\\images\\'+account+'\\'+row[4], "rb") as i:
+            #     encoded_string = base64.b64encode(i.read())
+            table += '<tr><td>%s</td><td>%s</td><td>%s</td><td><img src="%s"></td><td><input type="submit" value="Delete" onclick="del(\'%s\')"></td></tr>' % (row[1], row[2], row[3], os.getcwd()+'\\images\\'+account+'\\'+row[4], os.getcwd()+'\\images\\'+account+'\\'+row[4])
         return render_template('history.html', session=user_status[account], table=table, account=account)
     
 
